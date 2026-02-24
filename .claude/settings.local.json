@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn init:*)",
+      "Bash(yarn add:*)",
+      "Bash(chmod:*)",
+      "Bash(yarn tsc:*)",
+      "Bash(yarn vite build:*)",
+      "Bash(yarn tsx:*)",
+      "Bash(curl:*)",
+      "Bash(./bin/translatejs:*)"
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+export interface TranslationEntry {
+  [language: string]: string | null;
+}
+
+export interface TranslationsData {
+  translations: {
+    [key: string]: TranslationEntry;
+  };
+  metadata: {
+    lastUpdated: string;
+    version: number;
+  };
+}
+
+export interface TranslateJSConfig {
+  masterLanguage: string;
+  availableLanguages: string[];
+  aiModel: string;
+  dbPath?: string;
+  port?: number;
+  getGroup: (key: string) => string;
+  sets: Array<{
+    destination: string;
+    groups: string[];
+  }>;
+}
+
+export interface ExtractedTranslation {
+  key: string;
+  defaultValue: string;
+  file: string;
+  line: number;
+}
+
+export interface TranslationStatus {
+  key: string;
+  translations: TranslationEntry;
+  status: "complete" | "partial" | "missing";
+  group: string;
+}
+
+export interface APIResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}

@@ -11,3 +11,28 @@
 
 #!.yarn/cache
 .pnp.*
+
+# Build output
+dist/
+node_modules/
+
+# Generated files
+translations.json
+output/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
