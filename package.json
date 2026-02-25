@@ -1,6 +1,6 @@
 {
   "name": "langojs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Translation management tool with GUI, CLI, and AI-powered auto-translation",
   "type": "module",
   "main": "./dist/index.js",
