@@ -12,10 +12,11 @@ export interface TranslationsData {
   };
 }
 
-export interface TranslateJSConfig {
+export interface LangoJSConfig {
   masterLanguage: string;
   availableLanguages: string[];
   aiModel: string;
+  sourceRoot: string;
   dbPath?: string;
   port?: number;
   getGroup: (key: string) => string;

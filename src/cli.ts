@@ -6,24 +6,28 @@ import { loadConfig, createServer } from "./server/index.js";
 const program = new Command();
 
 program
-  .name("translatejs")
-  .description("Translation management tool with GUI and AI-powered auto-translation")
+  .name("langojs")
+  .description(
+    "Translation management tool with GUI and AI-powered auto-translation",
+  )
   .version("1.0.0");
 
 program
   .command("serve", { isDefault: true })
-  .description("Start the TranslateJS GUI server")
+  .description("Start the LangoJS GUI server")
   .option("-p, --port <port>", "Port to run the server on")
   .option("--no-open", "Don't open browser automatically")
   .action(async (options) => {
     try {
       const config = await loadConfig();
-      const port = options.port ? parseInt(options.port, 10) : config.port || 4400;
+      const port = options.port
+        ? parseInt(options.port, 10)
+        : config.port || 4400;
       const { app } = await createServer({ ...config, port });
 
       const server = app.listen(port, () => {
         const url = `http://localhost:${port}`;
-        console.log(`\n  TranslateJS running at ${url}\n`);
+        console.log(`\n  LangoJS running at ${url}\n`);
 
         if (options.open !== false) {
           open(url);
@@ -48,10 +52,13 @@ program
 program
   .command("extract")
   .description("Extract translation keys from codebase")
-  .option("-p, --patterns <patterns...>", "Glob patterns to search", ["**/*.{ts,tsx,js,jsx}"])
+  .option("-p, --patterns <patterns...>", "Glob patterns to search", [
+    "**/*.{ts,tsx,js,jsx}",
+  ])
   .action(async (options) => {
     try {
-      const { extractFromCodebase } = await import("./server/services/extractor.js");
+      const { extractFromCodebase } =
+        await import("./server/services/extractor.js");
       const config = await loadConfig();
       const result = await extractFromCodebase(config, options.patterns);
 
@@ -70,13 +77,16 @@ program
   .description("Generate translation set files")
   .action(async () => {
     try {
-      const { generateTranslationSets } = await import("./server/services/generator.js");
+      const { generateTranslationSets } =
+        await import("./server/services/generator.js");
       const config = await loadConfig();
       const files = generateTranslationSets(config);
 
       console.log(`\n  Generated ${files.length} files:`);
       for (const file of files) {
-        console.log(`    ${file.path} (${file.language}: ${file.keyCount} keys)`);
+        console.log(
+          `    ${file.path} (${file.language}: ${file.keyCount} keys)`,
+        );
       }
       console.log("");
     } catch (error) {
@@ -91,11 +101,14 @@ program
   .action(async () => {
     try {
       if (!process.env.OPENAI_API_KEY) {
-        console.error("\n  Error: OPENAI_API_KEY environment variable is required\n");
+        console.error(
+          "\n  Error: OPENAI_API_KEY environment variable is required\n",
+        );
         process.exit(1);
       }
 
-      const { translateMissingStrings } = await import("./server/services/translator.js");
+      const { translateMissingStrings } =
+        await import("./server/services/translator.js");
       const config = await loadConfig();
 
       console.log("\n  Translating missing strings...\n");
@@ -103,7 +116,9 @@ program
 
       console.log(`  Translated ${results.length} strings:`);
       for (const result of results) {
-        console.log(`    ${result.key} [${result.language}]: ${result.translation}`);
+        console.log(
+          `    ${result.key} [${result.language}]: ${result.translation}`,
+        );
       }
       console.log("");
     } catch (error) {

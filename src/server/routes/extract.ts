@@ -1,8 +1,8 @@
 import { Router } from "express";
-import type { TranslateJSConfig } from "../../types/index.js";
+import type { LangoJSConfig } from "../../types/index.js";
 import { extractFromCodebase } from "../services/extractor.js";
 
-export function createExtractRouter(config: TranslateJSConfig): Router {
+export function createExtractRouter(config: LangoJSConfig): Router {
   const router = Router();
 
   router.post("/", async (req, res) => {

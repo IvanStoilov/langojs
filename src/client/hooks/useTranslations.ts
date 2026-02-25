@@ -26,16 +26,13 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
   const statuses: TranslationStatus[] = Object.entries(translations).map(
     ([key, entry]) => {
       const missingCount = availableLanguages.filter(
-        (lang) => entry[lang] === null || entry[lang] === undefined
+        (lang) => entry[lang] === null || entry[lang] === undefined,
       ).length;
 
-      const hasMaster =
-        entry[masterLanguage] !== null && entry[masterLanguage] !== undefined;
-
       let status: "complete" | "partial" | "missing";
-      if (!hasMaster) {
+      if (missingCount === availableLanguages.length - 1) {
         status = "missing";
-      } else if (missingCount > 0) {
+      } else if (missingCount > 1) {
         status = "partial";
       } else {
         status = "complete";
@@ -44,7 +41,7 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
       const group = key.split("_")[0];
 
       return { key, translations: entry, status, group };
-    }
+    },
   );
 
   const filtered = query
@@ -52,8 +49,8 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
         (s) =>
           s.key.toLowerCase().includes(query) ||
           Object.values(s.translations).some(
-            (v) => v && v.toLowerCase().includes(query)
-          )
+            (v) => v && v.toLowerCase().includes(query),
+          ),
       )
     : statuses;
 
@@ -98,14 +95,17 @@ export function useTranslations() {
   const updateTranslation = async (
     key: string,
     language: string,
-    value: string | null
+    value: string | null,
   ) => {
     try {
-      const response = await fetch(`/api/translations/${encodeURIComponent(key)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, value }),
-      });
+      const response = await fetch(
+        `/api/translations/${encodeURIComponent(key)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language, value }),
+        },
+      );
 
       const result = await response.json();
 

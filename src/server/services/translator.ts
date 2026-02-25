@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import type { TranslateJSConfig } from "../../types/index.js";
+import type { LangoJSConfig } from "../../types/index.js";
 import { readTranslations, writeTranslations } from "./db.js";
 
 interface TranslationResult {
@@ -10,8 +10,8 @@ interface TranslationResult {
 }
 
 export async function translateMissingStrings(
-  config: TranslateJSConfig,
-  keys?: string[]
+  config: LangoJSConfig,
+  keys?: string[],
 ): Promise<TranslationResult[]> {
   const data = readTranslations(config);
   const results: TranslationResult[] = [];
@@ -64,9 +64,9 @@ Text to translate: "${masterValue}"`,
 }
 
 export async function translateSingleString(
-  config: TranslateJSConfig,
+  config: LangoJSConfig,
   key: string,
-  targetLanguage: string
+  targetLanguage: string,
 ): Promise<TranslationResult | null> {
   const data = readTranslations(config);
   const translations = data.translations[key];

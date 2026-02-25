@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync, existsSync } from "fs";
 import { dirname, join } from "path";
-import type { TranslateJSConfig } from "../../types/index.js";
+import type { LangoJSConfig } from "../../types/index.js";
 import { readTranslations } from "./db.js";
 
 interface GeneratedFile {
@@ -10,7 +10,7 @@ interface GeneratedFile {
 }
 
 export function generateTranslationSets(
-  config: TranslateJSConfig
+  config: LangoJSConfig,
 ): GeneratedFile[] {
   const data = readTranslations(config);
   const generatedFiles: GeneratedFile[] = [];
@@ -28,11 +28,16 @@ export function generateTranslationSets(
       const group = config.getGroup(key);
 
       if (set.groups.includes(group)) {
+        const masterValue = translations[config.masterLanguage];
+        if (masterValue === null || masterValue === undefined) {
+          continue;
+        }
+
         for (const lang of config.availableLanguages) {
           const value = translations[lang];
-          if (value !== null && value !== undefined) {
-            groupedTranslations[lang][key] = value;
-          }
+          // Use translation if available, otherwise fallback to master language
+          groupedTranslations[lang][key] =
+            value !== null && value !== undefined ? value : masterValue;
         }
       }
     }
@@ -52,7 +57,7 @@ export function generateTranslationSets(
       writeFileSync(
         filePath,
         JSON.stringify(groupedTranslations[lang], null, 2),
-        "utf-8"
+        "utf-8",
       );
 
       generatedFiles.push({

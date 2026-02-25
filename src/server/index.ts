@@ -3,7 +3,7 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { existsSync } from "fs";
-import type { TranslateJSConfig } from "../types/index.js";
+import type { LangoJSConfig } from "../types/index.js";
 import { createTranslationsRouter } from "./routes/translations.js";
 import { createExtractRouter } from "./routes/extract.js";
 import { createGenerateRouter } from "./routes/generate.js";
@@ -12,26 +12,24 @@ import { createAIRouter } from "./routes/ai.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export async function loadConfig(): Promise<TranslateJSConfig> {
+export async function loadConfig(): Promise<LangoJSConfig> {
   const configPaths = [
-    join(process.cwd(), "translatejs.config.ts"),
-    join(process.cwd(), "translatejs.config.js"),
-    join(process.cwd(), "translatejs.config.mjs"),
+    join(process.cwd(), "langojs.config.ts"),
+    join(process.cwd(), "langojs.config.js"),
+    join(process.cwd(), "langojs.config.mjs"),
   ];
 
   for (const configPath of configPaths) {
     if (existsSync(configPath)) {
       const config = await import(configPath);
-      return config.default as TranslateJSConfig;
+      return config.default as LangoJSConfig;
     }
   }
 
-  throw new Error(
-    "No translatejs.config.ts/js/mjs found in the current directory"
-  );
+  throw new Error("No langojs.config.ts/js/mjs found in the current directory");
 }
 
-export async function createServer(config: TranslateJSConfig) {
+export async function createServer(config: LangoJSConfig) {
   const app = express();
   const port = config.port || 4400;
 
@@ -51,7 +49,7 @@ export async function createServer(config: TranslateJSConfig) {
   ];
 
   const clientPath = clientPaths.find(
-    (p) => existsSync(p) && existsSync(join(p, "index.html"))
+    (p) => existsSync(p) && existsSync(join(p, "index.html")),
   );
 
   if (clientPath) {
@@ -70,7 +68,7 @@ export async function startServer() {
     const { app, port } = await createServer(config);
 
     app.listen(port, () => {
-      console.log(`TranslateJS server running at http://localhost:${port}`);
+      console.log(`LangoJS server running at http://localhost:${port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

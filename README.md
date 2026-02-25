@@ -1,1 +1,1 @@
-# translatejs
+# langojs

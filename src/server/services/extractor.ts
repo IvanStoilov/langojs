@@ -1,9 +1,6 @@
 import { readFileSync } from "fs";
 import { glob } from "glob";
-import type {
-  ExtractedTranslation,
-  TranslateJSConfig,
-} from "../../types/index.js";
+import type { ExtractedTranslation, LangoJSConfig } from "../../types/index.js";
 import { addTranslationKey, readTranslations } from "./db.js";
 
 const T_PATTERN = /\bt\(\s*["'`]([^"'`]+)["'`]\s*,\s*["'`]([^"'`]+)["'`]/g;
@@ -30,14 +27,15 @@ export function extractFromFile(filePath: string): ExtractedTranslation[] {
 }
 
 export async function extractFromCodebase(
-  config: TranslateJSConfig,
-  patterns: string[] = ["**/*.{ts,tsx,js,jsx}"]
+  config: LangoJSConfig,
+  patterns: string[] = ["**/*.{ts,tsx,js,jsx}"],
 ): Promise<{
   extracted: ExtractedTranslation[];
   added: number;
   existing: number;
 }> {
   const files = await glob(patterns, {
+    cwd: config.sourceRoot,
     ignore: ["**/node_modules/**", "**/dist/**", "**/.git/**"],
     absolute: true,
   });

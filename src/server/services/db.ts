@@ -1,11 +1,11 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import type { TranslationsData, TranslateJSConfig } from "../../types/index.js";
+import type { TranslationsData, LangoJSConfig } from "../../types/index.js";
 
-export function getDbPath(config: TranslateJSConfig): string {
+export function getDbPath(config: LangoJSConfig): string {
   return config.dbPath || "./translations.json";
 }
 
-export function readTranslations(config: TranslateJSConfig): TranslationsData {
+export function readTranslations(config: LangoJSConfig): TranslationsData {
   const dbPath = getDbPath(config);
 
   if (!existsSync(dbPath)) {
@@ -25,8 +25,8 @@ export function readTranslations(config: TranslateJSConfig): TranslationsData {
 }
 
 export function writeTranslations(
-  config: TranslateJSConfig,
-  data: TranslationsData
+  config: LangoJSConfig,
+  data: TranslationsData,
 ): void {
   const dbPath = getDbPath(config);
   data.metadata.lastUpdated = new Date().toISOString();
@@ -34,10 +34,10 @@ export function writeTranslations(
 }
 
 export function updateTranslation(
-  config: TranslateJSConfig,
+  config: LangoJSConfig,
   key: string,
   language: string,
-  value: string | null
+  value: string | null,
 ): TranslationsData {
   const data = readTranslations(config);
 
@@ -54,9 +54,9 @@ export function updateTranslation(
 }
 
 export function addTranslationKey(
-  config: TranslateJSConfig,
+  config: LangoJSConfig,
   key: string,
-  defaultValue: string
+  defaultValue: string,
 ): TranslationsData {
   const data = readTranslations(config);
 

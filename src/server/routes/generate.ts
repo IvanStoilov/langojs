@@ -1,8 +1,8 @@
 import { Router } from "express";
-import type { TranslateJSConfig } from "../../types/index.js";
+import type { LangoJSConfig } from "../../types/index.js";
 import { generateTranslationSets } from "../services/generator.js";
 
-export function createGenerateRouter(config: TranslateJSConfig): Router {
+export function createGenerateRouter(config: LangoJSConfig): Router {
   const router = Router();
 
   router.post("/", (_req, res) => {

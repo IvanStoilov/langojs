@@ -1,4 +1,4 @@
-import { signal } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import type { TranslationStatus } from "../../types/index.js";
 import { StatusBadge } from "./StatusBadge";
 
@@ -17,8 +17,8 @@ export function TranslationRow({
   onUpdate,
   onTranslateSingle,
 }: TranslationRowProps) {
-  const editingCell = signal<string | null>(null);
-  const translatingCell = signal<string | null>(null);
+  const editingCell = useSignal<string | null>(null);
+  const translatingCell = useSignal<string | null>(null);
 
   const handleBlur = (language: string, value: string) => {
     const newValue = value.trim() || null;

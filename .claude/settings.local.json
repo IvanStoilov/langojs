@@ -8,7 +8,8 @@
       "Bash(yarn vite build:*)",
       "Bash(yarn tsx:*)",
       "Bash(curl:*)",
-      "Bash(./bin/translatejs:*)"
+      "Bash(./bin/langojs:*)",
+      "Bash(node dist/cli.js:*)"
     ]
   }
 }

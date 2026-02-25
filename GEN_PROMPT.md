@@ -1,4 +1,4 @@
-# TranslateJS
+# LangoJS
 
 I want to build translations tool package that is responsible for managing translation strings in a javascript repository. I want it to store all translations in a single json file as a DB. I want to be able to translate each string in multiple languages. Those translations can then be distributed in the required folders, so that they can be imported by the translation library used in the repository.
 

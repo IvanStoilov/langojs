@@ -1,11 +1,11 @@
 import { Router } from "express";
-import type { TranslateJSConfig } from "../../types/index.js";
+import type { LangoJSConfig } from "../../types/index.js";
 import {
   translateMissingStrings,
   translateSingleString,
 } from "../services/translator.js";
 
-export function createAIRouter(config: TranslateJSConfig): Router {
+export function createAIRouter(config: LangoJSConfig): Router {
   const router = Router();
 
   router.post("/", async (req, res) => {
