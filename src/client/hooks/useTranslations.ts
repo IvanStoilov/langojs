@@ -3,6 +3,7 @@ import type { TranslationEntry, TranslationStatus } from "../../types/index.js";
 
 interface TranslationsState {
   translations: { [key: string]: TranslationEntry };
+  groups: { [key: string]: string };
   pendingApproval: string[]; // Format: "language:key"
   masterLanguage: string;
   availableLanguages: string[];
@@ -12,6 +13,7 @@ interface TranslationsState {
 
 const state = signal<TranslationsState>({
   translations: {},
+  groups: {},
   pendingApproval: [],
   masterLanguage: "en",
   availableLanguages: [],
@@ -21,10 +23,13 @@ const state = signal<TranslationsState>({
 
 const searchQuery = signal("");
 const selectedKey = signal<string | null>(null);
-const statusFilter = signal<"all" | "missing" | "partial" | "pending" | "complete">("all");
+const statusFilter = signal<
+  "all" | "missing" | "partial" | "pending" | "complete"
+>("all");
 
 export const translationStatuses = computed<TranslationStatus[]>(() => {
-  const { translations, masterLanguage, availableLanguages } = state.value;
+  const { translations, groups, masterLanguage, availableLanguages } =
+    state.value;
   const query = searchQuery.value.toLowerCase();
 
   const statuses: TranslationStatus[] = Object.entries(translations).map(
@@ -42,7 +47,8 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
         status = "complete";
       }
 
-      const group = key.split("_")[0];
+      // Use group from backend, fallback to key prefix if not available
+      const group = groups[key] || key.split("_")[0];
 
       return { key, translations: entry, status, group };
     },
@@ -102,6 +108,7 @@ export function useTranslations() {
         state.value = {
           ...state.value,
           translations: result.data.translations,
+          groups: result.data.groups || {},
           pendingApproval: result.data.pendingApproval || [],
           masterLanguage: result.data.config.masterLanguage,
           availableLanguages: result.data.config.availableLanguages,
@@ -186,6 +193,35 @@ export function useTranslations() {
       }
     } catch (error) {
       console.error("Failed to approve translation:", error);
+    }
+  };
+
+  const approveAllForKey = async (key: string) => {
+    try {
+      const response = await fetch(
+        `/api/translations/${encodeURIComponent(key)}/approve-all`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        state.value = {
+          ...state.value,
+          pendingApproval: result.data.pendingApproval,
+        };
+
+        // Auto-select the next pending key if available
+        const nextPending = result.data.pendingApproval[0];
+        if (nextPending) {
+          selectKey(nextPending.split(":")[1]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to approve all translations:", error);
     }
   };
 
@@ -293,7 +329,9 @@ export function useTranslations() {
     selectedKey.value = key;
   };
 
-  const setFilter = (filter: "all" | "missing" | "partial" | "pending" | "complete") => {
+  const setFilter = (
+    filter: "all" | "missing" | "partial" | "pending" | "complete",
+  ) => {
     statusFilter.value = filter;
   };
 
@@ -317,6 +355,7 @@ export function useTranslations() {
     fetchTranslations,
     updateTranslation,
     approveTranslation,
+    approveAllForKey,
     extractTranslations,
     generateSets,
     translateAll,

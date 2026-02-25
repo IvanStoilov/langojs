@@ -13,6 +13,7 @@ export function App() {
     fetchTranslations,
     updateTranslation,
     approveTranslation,
+    approveAllForKey,
     extractTranslations,
     generateSets,
     translateAll,
@@ -25,6 +26,43 @@ export function App() {
 
   useEffect(() => {
     fetchTranslations();
+  }, []);
+
+  // Global keyboard navigation for translation list
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        return;
+      }
+
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") {
+        return;
+      }
+
+      const items = translationStatuses.value;
+      if (items.length === 0) return;
+
+      e.preventDefault();
+
+      const currentKey = selectedKey.value;
+      const currentIndex = currentKey
+        ? items.findIndex((item) => item.key === currentKey)
+        : -1;
+
+      let newIndex: number;
+      if (e.key === "ArrowUp") {
+        newIndex = currentIndex <= 0 ? items.length - 1 : currentIndex - 1;
+      } else {
+        newIndex = currentIndex >= items.length - 1 ? 0 : currentIndex + 1;
+      }
+
+      selectKey(items[newIndex].key);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const selectedItem = computed(() => {
@@ -90,6 +128,7 @@ export function App() {
         pendingApproval={state.value.pendingApproval}
         onUpdate={updateTranslation}
         onApprove={approveTranslation}
+        onApproveAll={approveAllForKey}
         onTranslateSingle={translateSingle}
         onTranslateAll={translateAll}
         onExtract={extractTranslations}

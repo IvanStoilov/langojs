@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "preact/hooks";
 import type { Signal } from "@preact/signals";
 import type { TranslationStatus } from "../../types/index.js";
 
@@ -148,31 +149,72 @@ export function Sidebar({
       </div>
 
       {/* Translation List */}
-      <div class="flex-1 overflow-y-auto sidebar-scroll">
-        {items.length === 0 ? (
-          <div class="p-4 text-center text-[var(--color-text-dim)] text-sm">
-            No translations found
-          </div>
-        ) : (
-          <div class="py-1">
-            {items.map((item) => {
-              const hasPending = pendingApproval.some((p) =>
-                p.endsWith(`:${item.key}`),
-              );
-              return (
-                <TranslationListItem
-                  key={item.key}
-                  item={item}
-                  isSelected={selectedKey.value === item.key}
-                  hasPending={hasPending}
-                  onSelect={onSelect}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <TranslationList
+        items={items}
+        selectedKey={selectedKey}
+        pendingApproval={pendingApproval}
+        onSelect={onSelect}
+      />
     </aside>
+  );
+}
+
+interface TranslationListProps {
+  items: TranslationStatus[];
+  selectedKey: Signal<string | null>;
+  pendingApproval: string[];
+  onSelect: (key: string) => void;
+}
+
+function TranslationList({
+  items,
+  selectedKey,
+  pendingApproval,
+  onSelect,
+}: TranslationListProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Scroll selected item into view when selection changes
+  useEffect(() => {
+    if (!selectedKey.value || !listRef.current) return;
+
+    const selectedElement = listRef.current.querySelector(
+      `[data-key="${selectedKey.value}"]`,
+    );
+    if (selectedElement) {
+      selectedElement.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selectedKey.value]);
+
+  if (items.length === 0) {
+    return (
+      <div class="flex-1 overflow-y-auto sidebar-scroll">
+        <div class="p-4 text-center text-[var(--color-text-dim)] text-sm">
+          No translations found
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={listRef} class="flex-1 overflow-y-auto sidebar-scroll">
+      <div class="py-1">
+        {items.map((item) => {
+          const hasPending = pendingApproval.some((p) =>
+            p.endsWith(`:${item.key}`),
+          );
+          return (
+            <TranslationListItem
+              key={item.key}
+              item={item}
+              isSelected={selectedKey.value === item.key}
+              hasPending={hasPending}
+              onSelect={onSelect}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -198,6 +240,7 @@ function TranslationListItem({
   return (
     <button
       onClick={() => onSelect(item.key)}
+      data-key={item.key}
       class={`translation-item w-full text-left px-4 py-2.5 flex items-start gap-3 hover:bg-[var(--color-surface-raised)] cursor-pointer ${isSelected ? "active" : ""}`}
     >
       <span

@@ -8,6 +8,7 @@ interface TranslationEditorProps {
   pendingApproval: string[];
   onUpdate: (key: string, language: string, value: string | null) => void;
   onApprove: (key: string, language: string) => Promise<void>;
+  onApproveAll: (key: string) => Promise<void>;
   onTranslateSingle: (key: string, language: string) => Promise<unknown>;
   onTranslateAll: () => Promise<unknown>;
   onExtract: () => Promise<unknown>;
@@ -22,6 +23,7 @@ export function TranslationEditor({
   pendingApproval,
   onUpdate,
   onApprove,
+  onApproveAll,
   onTranslateSingle,
   onTranslateAll,
   onExtract,
@@ -203,8 +205,37 @@ export function TranslationEditor({
             );
           })}
 
-          {/* Clear translations button */}
-          <div class="pt-4 border-t border-[var(--color-border)]">
+          {/* Action buttons */}
+          <div class="pt-4 border-t border-[var(--color-border)] flex items-center gap-3">
+            {/* Approve All button - only show if there are pending approvals for this key */}
+            {pendingApproval.some((p) => p.endsWith(`:${item.key}`)) && (
+              <button
+                onClick={() =>
+                  handleAction("approveAll", () => onApproveAll(item.key))
+                }
+                disabled={actionLoading.value !== null}
+                class="btn-ghost text-[var(--color-success)] hover:bg-[var(--color-success)]/10 flex items-center gap-1.5"
+              >
+                {actionLoading.value === "approveAll" ? (
+                  <Spinner />
+                ) : (
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                )}
+                Approve all
+              </button>
+            )}
             <button
               onClick={() =>
                 handleAction("clear", () => onClearTranslations(item.key))

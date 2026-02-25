@@ -17,6 +17,7 @@
     "bin"
   ],
   "scripts": {
+    "client": "vite --port=4401",
     "dev": "concurrently -k -n vite,server -c cyan,green \"vite --port=4401\" \"nodemon\"",
     "dev:server": "nodemon",
     "build": "tsc -p tsconfig.build.json && vite build",
