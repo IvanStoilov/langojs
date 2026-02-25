@@ -6,6 +6,7 @@ export interface TranslationsData {
   translations: {
     [key: string]: TranslationEntry;
   };
+  pendingApproval: string[]; // Format: "language:key" e.g. "es:app_welcome"
   metadata: {
     lastUpdated: string;
     version: number;

@@ -1,6 +1,10 @@
 import { Router } from "express";
 import type { LangoJSConfig, TranslationEntry } from "../../types/index.js";
-import { readTranslations, writeTranslations } from "../services/db.js";
+import {
+  readTranslations,
+  writeTranslations,
+  getPendingApprovalKey,
+} from "../services/db.js";
 
 export function createTranslationsRouter(config: LangoJSConfig): Router {
   const router = Router();
@@ -12,6 +16,7 @@ export function createTranslationsRouter(config: LangoJSConfig): Router {
         success: true,
         data: {
           translations: data.translations,
+          pendingApproval: data.pendingApproval,
           metadata: data.metadata,
           config: {
             masterLanguage: config.masterLanguage,
@@ -68,11 +73,53 @@ export function createTranslationsRouter(config: LangoJSConfig): Router {
       }
 
       data.translations[key][language] = value;
+
+      // Remove from pending approval when manually edited
+      const pendingKey = getPendingApprovalKey(language, key);
+      data.pendingApproval = data.pendingApproval.filter(
+        (k) => k !== pendingKey,
+      );
+
       writeTranslations(config, data);
 
       res.json({
         success: true,
-        data: { key, language, value },
+        data: { key, language, value, pendingApproval: data.pendingApproval },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Approve a translation (remove from pending)
+  router.post("/:key/approve", (req, res) => {
+    try {
+      const { key } = req.params;
+      const { language } = req.body as { language: string };
+
+      const data = readTranslations(config);
+
+      if (!data.translations[key]) {
+        res.status(404).json({
+          success: false,
+          error: `Translation key "${key}" not found`,
+        });
+        return;
+      }
+
+      const pendingKey = getPendingApprovalKey(language, key);
+      data.pendingApproval = data.pendingApproval.filter(
+        (k) => k !== pendingKey,
+      );
+
+      writeTranslations(config, data);
+
+      res.json({
+        success: true,
+        data: { key, language, pendingApproval: data.pendingApproval },
       });
     } catch (error) {
       res.status(500).json({

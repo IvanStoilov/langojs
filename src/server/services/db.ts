@@ -11,6 +11,7 @@ export function readTranslations(config: LangoJSConfig): TranslationsData {
   if (!existsSync(dbPath)) {
     const initial: TranslationsData = {
       translations: {},
+      pendingApproval: [],
       metadata: {
         lastUpdated: new Date().toISOString(),
         version: 1,
@@ -21,7 +22,14 @@ export function readTranslations(config: LangoJSConfig): TranslationsData {
   }
 
   const content = readFileSync(dbPath, "utf-8");
-  return JSON.parse(content) as TranslationsData;
+  const data = JSON.parse(content) as TranslationsData;
+
+  // Migration: add pendingApproval if not present
+  if (!data.pendingApproval) {
+    data.pendingApproval = [];
+  }
+
+  return data;
 }
 
 export function writeTranslations(
@@ -70,4 +78,55 @@ export function addTranslationKey(
   }
 
   return data;
+}
+
+// Pending approval helpers
+export function getPendingApprovalKey(language: string, key: string): string {
+  return `${language}:${key}`;
+}
+
+export function parsePendingApprovalKey(
+  pendingKey: string,
+): { language: string; key: string } | null {
+  const colonIndex = pendingKey.indexOf(":");
+  if (colonIndex === -1) return null;
+  return {
+    language: pendingKey.slice(0, colonIndex),
+    key: pendingKey.slice(colonIndex + 1),
+  };
+}
+
+export function addPendingApproval(
+  config: LangoJSConfig,
+  language: string,
+  key: string,
+): void {
+  const data = readTranslations(config);
+  const pendingKey = getPendingApprovalKey(language, key);
+
+  if (!data.pendingApproval.includes(pendingKey)) {
+    data.pendingApproval.push(pendingKey);
+    writeTranslations(config, data);
+  }
+}
+
+export function removePendingApproval(
+  config: LangoJSConfig,
+  language: string,
+  key: string,
+): void {
+  const data = readTranslations(config);
+  const pendingKey = getPendingApprovalKey(language, key);
+
+  data.pendingApproval = data.pendingApproval.filter((k) => k !== pendingKey);
+  writeTranslations(config, data);
+}
+
+export function isPendingApproval(
+  data: TranslationsData,
+  language: string,
+  key: string,
+): boolean {
+  const pendingKey = getPendingApprovalKey(language, key);
+  return data.pendingApproval.includes(pendingKey);
 }

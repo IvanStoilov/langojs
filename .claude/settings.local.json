@@ -9,7 +9,8 @@
       "Bash(yarn tsx:*)",
       "Bash(curl:*)",
       "Bash(./bin/langojs:*)",
-      "Bash(node dist/cli.js:*)"
+      "Bash(node dist/cli.js:*)",
+      "Bash(yarn build:*)"
     ]
   }
 }

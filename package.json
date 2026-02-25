@@ -12,11 +12,26 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
-    "dev": "vite --port=4401",
+    "dev": "concurrently -k -n vite,server -c cyan,green \"vite --port=4401\" \"nodemon\"",
+    "dev:server": "nodemon",
     "build": "tsc -p tsconfig.build.json && vite build",
     "serve": "node dist/cli.js",
     "preview": "vite preview"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/server",
+      "src/cli.ts",
+      "src/types",
+      "src/index.ts"
+    ],
+    "ext": "ts",
+    "exec": "tsx src/cli.ts serve --no-open"
   },
   "keywords": [
     "translation",
@@ -31,6 +46,7 @@
     "ai": "^6.0.98",
     "commander": "^14.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "glob": "^13.0.6",
     "open": "^11.0.0",
@@ -47,6 +63,8 @@
     "@types/glob": "^9.0.0",
     "@types/node": "^25.3.0",
     "autoprefixer": "^10.4.24",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14",
     "postcss": "^8.5.6",
     "preact": "^10.28.4",
     "tailwindcss": "^4.2.1",

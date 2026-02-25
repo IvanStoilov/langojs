@@ -3,6 +3,7 @@ import type { TranslationEntry, TranslationStatus } from "../../types/index.js";
 
 interface TranslationsState {
   translations: { [key: string]: TranslationEntry };
+  pendingApproval: string[]; // Format: "language:key"
   masterLanguage: string;
   availableLanguages: string[];
   loading: boolean;
@@ -11,6 +12,7 @@ interface TranslationsState {
 
 const state = signal<TranslationsState>({
   translations: {},
+  pendingApproval: [],
   masterLanguage: "en",
   availableLanguages: [],
   loading: true,
@@ -18,6 +20,8 @@ const state = signal<TranslationsState>({
 });
 
 const searchQuery = signal("");
+const selectedKey = signal<string | null>(null);
+const statusFilter = signal<"all" | "missing" | "partial" | "pending" | "complete">("all");
 
 export const translationStatuses = computed<TranslationStatus[]>(() => {
   const { translations, masterLanguage, availableLanguages } = state.value;
@@ -44,7 +48,11 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
     },
   );
 
-  const filtered = query
+  const { pendingApproval } = state.value;
+  const filter = statusFilter.value;
+
+  // Apply text search filter
+  let filtered = query
     ? statuses.filter(
         (s) =>
           s.key.toLowerCase().includes(query) ||
@@ -54,9 +62,31 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
       )
     : statuses;
 
+  // Apply status filter
+  if (filter !== "all") {
+    filtered = filtered.filter((s) => {
+      const hasPending = pendingApproval.some((p) => p.endsWith(`:${s.key}`));
+      if (filter === "pending") return hasPending;
+      if (filter === "missing") return s.status === "missing";
+      if (filter === "partial") return s.status === "partial";
+      if (filter === "complete") return s.status === "complete" && !hasPending;
+      return true;
+    });
+  }
+
+  // Sort order: missing → partial → pending → complete
   return filtered.sort((a, b) => {
-    const statusOrder = { missing: 0, partial: 1, complete: 2 };
-    return statusOrder[a.status] - statusOrder[b.status];
+    const aHasPending = pendingApproval.some((p) => p.endsWith(`:${a.key}`));
+    const bHasPending = pendingApproval.some((p) => p.endsWith(`:${b.key}`));
+
+    const getOrder = (status: string, isPending: boolean) => {
+      if (status === "missing") return 0;
+      if (status === "partial") return 1;
+      if (isPending) return 2;
+      return 3; // complete
+    };
+
+    return getOrder(a.status, aHasPending) - getOrder(b.status, bHasPending);
   });
 });
 
@@ -72,6 +102,7 @@ export function useTranslations() {
         state.value = {
           ...state.value,
           translations: result.data.translations,
+          pendingApproval: result.data.pendingApproval || [],
           masterLanguage: result.data.config.masterLanguage,
           availableLanguages: result.data.config.availableLanguages,
           loading: false,
@@ -110,6 +141,8 @@ export function useTranslations() {
       const result = await response.json();
 
       if (result.success) {
+        // Remove from pending approval on manual edit
+        const pendingKey = `${language}:${key}`;
         state.value = {
           ...state.value,
           translations: {
@@ -119,10 +152,40 @@ export function useTranslations() {
               [language]: value,
             },
           },
+          pendingApproval: state.value.pendingApproval.filter(
+            (k) => k !== pendingKey,
+          ),
         };
       }
     } catch (error) {
       console.error("Failed to update translation:", error);
+    }
+  };
+
+  const approveTranslation = async (key: string, language: string) => {
+    try {
+      const response = await fetch(
+        `/api/translations/${encodeURIComponent(key)}/approve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language }),
+        },
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        const pendingKey = `${language}:${key}`;
+        state.value = {
+          ...state.value,
+          pendingApproval: state.value.pendingApproval.filter(
+            (k) => k !== pendingKey,
+          ),
+        };
+      }
+    } catch (error) {
+      console.error("Failed to approve translation:", error);
     }
   };
 
@@ -194,6 +257,14 @@ export function useTranslations() {
 
       const result = await response.json();
       if (result.success) {
+        // Add to pending approval for AI translations
+        const pendingKey = `${language}:${key}`;
+        const newPendingApproval = state.value.pendingApproval.includes(
+          pendingKey,
+        )
+          ? state.value.pendingApproval
+          : [...state.value.pendingApproval, pendingKey];
+
         state.value = {
           ...state.value,
           translations: {
@@ -203,6 +274,7 @@ export function useTranslations() {
               [language]: result.data.translation,
             },
           },
+          pendingApproval: newPendingApproval,
         };
         return result.data;
       }
@@ -217,16 +289,41 @@ export function useTranslations() {
     searchQuery.value = query;
   };
 
+  const selectKey = (key: string | null) => {
+    selectedKey.value = key;
+  };
+
+  const setFilter = (filter: "all" | "missing" | "partial" | "pending" | "complete") => {
+    statusFilter.value = filter;
+  };
+
+  const clearTranslations = async (key: string) => {
+    const { masterLanguage, availableLanguages } = state.value;
+
+    // Update all non-master languages to null
+    for (const lang of availableLanguages) {
+      if (lang !== masterLanguage) {
+        await updateTranslation(key, lang, null);
+      }
+    }
+  };
+
   return {
     state,
     searchQuery,
+    selectedKey,
+    statusFilter,
     translationStatuses,
     fetchTranslations,
     updateTranslation,
+    approveTranslation,
     extractTranslations,
     generateSets,
     translateAll,
     translateSingle,
     setSearch,
+    selectKey,
+    setFilter,
+    clearTranslations,
   };
 }

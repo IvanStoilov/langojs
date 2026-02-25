@@ -54,19 +54,23 @@ export function generateTranslationSets(
         mkdirSync(dir, { recursive: true });
       }
 
-      writeFileSync(
-        filePath,
-        JSON.stringify(groupedTranslations[lang], null, 2),
-        "utf-8",
-      );
+      const sorted = sortKeys(groupedTranslations[lang]);
+
+      writeFileSync(filePath, JSON.stringify(sorted, null, 2), "utf-8");
 
       generatedFiles.push({
         path: filePath,
         language: lang,
-        keyCount: Object.keys(groupedTranslations[lang]).length,
+        keyCount: Object.keys(sorted).length,
       });
     }
   }
 
   return generatedFiles;
+}
+
+function sortKeys(obj: { [key: string]: string }): { [key: string]: string } {
+  return Object.fromEntries(
+    Object.entries(obj).sort(([a], [b]) => a.localeCompare(b)),
+  );
 }
