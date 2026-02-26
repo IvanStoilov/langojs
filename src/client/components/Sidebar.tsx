@@ -2,7 +2,13 @@ import { useEffect, useRef } from "preact/hooks";
 import type { Signal } from "@preact/signals";
 import type { TranslationStatus } from "../../types/index.js";
 
-type StatusFilter = "all" | "missing" | "partial" | "pending" | "complete";
+type StatusFilter =
+  | "all"
+  | "missing"
+  | "partial"
+  | "pending"
+  | "complete"
+  | "unused";
 
 interface SidebarProps {
   items: TranslationStatus[];
@@ -10,6 +16,7 @@ interface SidebarProps {
   searchQuery: Signal<string>;
   statusFilter: Signal<StatusFilter>;
   pendingApproval: string[];
+  unusedKeys: string[];
   onSearch: (query: string) => void;
   onSelect: (key: string) => void;
   onFilterChange: (filter: StatusFilter) => void;
@@ -19,6 +26,7 @@ interface SidebarProps {
     partial: number;
     missing: number;
     pending: number;
+    unused: number;
   };
 }
 
@@ -28,13 +36,14 @@ export function Sidebar({
   searchQuery,
   statusFilter,
   pendingApproval,
+  unusedKeys,
   onSearch,
   onSelect,
   onFilterChange,
   stats,
 }: SidebarProps) {
   return (
-    <aside class="w-80 flex-shrink-0 border-r border-[var(--color-border)] flex flex-col h-screen bg-[var(--color-surface)]">
+    <aside class="w-96 flex-shrink-0 border-r border-[var(--color-border)] flex flex-col h-screen bg-[var(--color-surface)]">
       {/* Header */}
       <div class="p-4 border-b border-[var(--color-border)]">
         <div class="flex items-center gap-2 mb-1">
@@ -74,12 +83,44 @@ export function Sidebar({
             {stats.total} total
           </span>
         </div>
-        {stats.pending > 0 && (
-          <div class="flex items-center gap-1.5 mt-2 text-xs text-[var(--color-warning)]">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {stats.pending} pending approval
+        {(stats.pending > 0 || stats.unused > 0) && (
+          <div class="flex items-center gap-3 mt-2 text-xs">
+            {stats.pending > 0 && (
+              <span class="flex items-center gap-1.5 text-[var(--color-warning)]">
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                {stats.pending} pending
+              </span>
+            )}
+            {stats.unused > 0 && (
+              <span class="flex items-center gap-1.5 text-[var(--color-text-dim)]">
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
+                </svg>
+                {stats.unused} unused
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -145,6 +186,12 @@ export function Sidebar({
             onClick={onFilterChange}
             color="success"
           />
+          <FilterButton
+            label="Unused"
+            value="unused"
+            current={statusFilter.value}
+            onClick={onFilterChange}
+          />
         </div>
       </div>
 
@@ -153,6 +200,7 @@ export function Sidebar({
         items={items}
         selectedKey={selectedKey}
         pendingApproval={pendingApproval}
+        unusedKeys={unusedKeys}
         onSelect={onSelect}
       />
     </aside>
@@ -163,6 +211,7 @@ interface TranslationListProps {
   items: TranslationStatus[];
   selectedKey: Signal<string | null>;
   pendingApproval: string[];
+  unusedKeys: string[];
   onSelect: (key: string) => void;
 }
 
@@ -170,6 +219,7 @@ function TranslationList({
   items,
   selectedKey,
   pendingApproval,
+  unusedKeys,
   onSelect,
 }: TranslationListProps) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -203,12 +253,14 @@ function TranslationList({
           const hasPending = pendingApproval.some((p) =>
             p.endsWith(`:${item.key}`),
           );
+          const isUnused = unusedKeys.includes(item.key);
           return (
             <TranslationListItem
               key={item.key}
               item={item}
               isSelected={selectedKey.value === item.key}
               hasPending={hasPending}
+              isUnused={isUnused}
               onSelect={onSelect}
             />
           );
@@ -222,6 +274,7 @@ interface TranslationListItemProps {
   item: TranslationStatus;
   isSelected: boolean;
   hasPending: boolean;
+  isUnused: boolean;
   onSelect: (key: string) => void;
 }
 
@@ -229,6 +282,7 @@ function TranslationListItem({
   item,
   isSelected,
   hasPending,
+  isUnused,
   onSelect,
 }: TranslationListItemProps) {
   const statusColors = {
@@ -264,6 +318,22 @@ function TranslationListItem({
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          )}
+          {isUnused && (
+            <svg
+              class="w-3 h-3 flex-shrink-0 text-[var(--color-text-dim)]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              title="Unused - not found in codebase"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
               />
             </svg>
           )}

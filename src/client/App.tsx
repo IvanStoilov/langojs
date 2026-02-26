@@ -15,6 +15,7 @@ export function App() {
     approveTranslation,
     approveAllForKey,
     extractTranslations,
+    checkUnused,
     generateSets,
     translateAll,
     translateSingle,
@@ -106,6 +107,7 @@ export function App() {
     partial: items.filter((i) => i.status === "partial").length,
     missing: items.filter((i) => i.status === "missing").length,
     pending: state.value.pendingApproval.length,
+    unused: state.value.unusedKeys.length,
   };
 
   return (
@@ -116,6 +118,7 @@ export function App() {
         searchQuery={searchQuery}
         statusFilter={statusFilter}
         pendingApproval={state.value.pendingApproval}
+        unusedKeys={state.value.unusedKeys}
         onSearch={setSearch}
         onSelect={selectKey}
         onFilterChange={setFilter}
@@ -132,6 +135,7 @@ export function App() {
         onTranslateSingle={translateSingle}
         onTranslateAll={translateAll}
         onExtract={extractTranslations}
+        onCheckUnused={checkUnused}
         onGenerate={generateSets}
         onClearTranslations={clearTranslations}
       />

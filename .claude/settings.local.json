@@ -10,7 +10,10 @@
       "Bash(curl:*)",
       "Bash(./bin/langojs:*)",
       "Bash(node dist/cli.js:*)",
-      "Bash(yarn build:*)"
+      "Bash(yarn build:*)",
+      "Bash(yarn test:run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest run)"
     ]
   }
 }

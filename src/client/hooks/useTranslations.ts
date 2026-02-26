@@ -5,6 +5,7 @@ interface TranslationsState {
   translations: { [key: string]: TranslationEntry };
   groups: { [key: string]: string };
   pendingApproval: string[]; // Format: "language:key"
+  unusedKeys: string[];
   masterLanguage: string;
   availableLanguages: string[];
   loading: boolean;
@@ -15,6 +16,7 @@ const state = signal<TranslationsState>({
   translations: {},
   groups: {},
   pendingApproval: [],
+  unusedKeys: [],
   masterLanguage: "en",
   availableLanguages: [],
   loading: true,
@@ -24,7 +26,7 @@ const state = signal<TranslationsState>({
 const searchQuery = signal("");
 const selectedKey = signal<string | null>(null);
 const statusFilter = signal<
-  "all" | "missing" | "partial" | "pending" | "complete"
+  "all" | "missing" | "partial" | "pending" | "complete" | "unused"
 >("all");
 
 export const translationStatuses = computed<TranslationStatus[]>(() => {
@@ -54,7 +56,7 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
     },
   );
 
-  const { pendingApproval } = state.value;
+  const { pendingApproval, unusedKeys } = state.value;
   const filter = statusFilter.value;
 
   // Apply text search filter
@@ -72,6 +74,8 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
   if (filter !== "all") {
     filtered = filtered.filter((s) => {
       const hasPending = pendingApproval.some((p) => p.endsWith(`:${s.key}`));
+      const isUnused = unusedKeys.includes(s.key);
+      if (filter === "unused") return isUnused;
       if (filter === "pending") return hasPending;
       if (filter === "missing") return s.status === "missing";
       if (filter === "partial") return s.status === "partial";
@@ -110,6 +114,7 @@ export function useTranslations() {
           translations: result.data.translations,
           groups: result.data.groups || {},
           pendingApproval: result.data.pendingApproval || [],
+          unusedKeys: result.data.unusedKeys || [],
           masterLanguage: result.data.config.masterLanguage,
           availableLanguages: result.data.config.availableLanguages,
           loading: false,
@@ -245,6 +250,29 @@ export function useTranslations() {
     }
   };
 
+  const checkUnused = async () => {
+    try {
+      const response = await fetch("/api/extract/check-unused", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        state.value = {
+          ...state.value,
+          unusedKeys: result.data.unusedKeys,
+        };
+        return result.data;
+      }
+      throw new Error(result.error);
+    } catch (error) {
+      console.error("Failed to check unused:", error);
+      throw error;
+    }
+  };
+
   const generateSets = async () => {
     try {
       const response = await fetch("/api/generate", {
@@ -330,7 +358,7 @@ export function useTranslations() {
   };
 
   const setFilter = (
-    filter: "all" | "missing" | "partial" | "pending" | "complete",
+    filter: "all" | "missing" | "partial" | "pending" | "complete" | "unused",
   ) => {
     statusFilter.value = filter;
   };
@@ -357,6 +385,7 @@ export function useTranslations() {
     approveTranslation,
     approveAllForKey,
     extractTranslations,
+    checkUnused,
     generateSets,
     translateAll,
     translateSingle,

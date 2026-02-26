@@ -12,6 +12,7 @@ export function readTranslations(config: LangoJSConfig): TranslationsData {
     const initial: TranslationsData = {
       translations: {},
       pendingApproval: [],
+      unusedKeys: [],
       metadata: {
         lastUpdated: new Date().toISOString(),
         version: 1,
@@ -27,6 +28,11 @@ export function readTranslations(config: LangoJSConfig): TranslationsData {
   // Migration: add pendingApproval if not present
   if (!data.pendingApproval) {
     data.pendingApproval = [];
+  }
+
+  // Migration: add unusedKeys if not present
+  if (!data.unusedKeys) {
+    data.unusedKeys = [];
   }
 
   return data;
@@ -64,7 +70,7 @@ export function updateTranslation(
 export function addTranslationKey(
   config: LangoJSConfig,
   key: string,
-  defaultValue: string,
+  defaultValue?: string,
 ): TranslationsData {
   const data = readTranslations(config);
 
@@ -73,7 +79,10 @@ export function addTranslationKey(
     for (const lang of config.availableLanguages) {
       data.translations[key][lang] = null;
     }
-    data.translations[key][config.masterLanguage] = defaultValue;
+    // Only set the master language value if a default was provided
+    if (defaultValue !== undefined) {
+      data.translations[key][config.masterLanguage] = defaultValue;
+    }
     writeTranslations(config, data);
   }
 

@@ -7,6 +7,7 @@ export interface TranslationsData {
     [key: string]: TranslationEntry;
   };
   pendingApproval: string[]; // Format: "language:key" e.g. "es:app_welcome"
+  unusedKeys: string[]; // Keys not found in the codebase
   metadata: {
     lastUpdated: string;
     version: number;
@@ -20,6 +21,7 @@ export interface LangoJSConfig {
   sourceRoot: string;
   dbPath?: string;
   port?: number;
+  ignorePaths?: string[];
   getGroup: (key: string) => string;
   sets: Array<{
     destination: string;
@@ -29,7 +31,7 @@ export interface LangoJSConfig {
 
 export interface ExtractedTranslation {
   key: string;
-  defaultValue: string;
+  defaultValue?: string;
   file: string;
   line: number;
 }

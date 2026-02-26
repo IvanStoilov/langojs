@@ -25,6 +25,7 @@ export function createTranslationsRouter(config: LangoJSConfig): Router {
           translations: data.translations,
           groups,
           pendingApproval: data.pendingApproval,
+          unusedKeys: data.unusedKeys,
           metadata: data.metadata,
           config: {
             masterLanguage: config.masterLanguage,

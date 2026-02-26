@@ -12,6 +12,7 @@ interface TranslationEditorProps {
   onTranslateSingle: (key: string, language: string) => Promise<unknown>;
   onTranslateAll: () => Promise<unknown>;
   onExtract: () => Promise<unknown>;
+  onCheckUnused: () => Promise<unknown>;
   onGenerate: () => Promise<unknown>;
   onClearTranslations: (key: string) => Promise<void>;
 }
@@ -27,6 +28,7 @@ export function TranslationEditor({
   onTranslateSingle,
   onTranslateAll,
   onExtract,
+  onCheckUnused,
   onGenerate,
   onClearTranslations,
 }: TranslationEditorProps) {
@@ -68,6 +70,27 @@ export function TranslationEditor({
                 />
               </svg>
               Extract
+            </button>
+            <button
+              onClick={() => handleAction("checkUnused", onCheckUnused)}
+              disabled={actionLoading.value !== null}
+              class="btn-secondary flex items-center gap-2"
+            >
+              {actionLoading.value === "checkUnused" && <Spinner />}
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                />
+              </svg>
+              Check Unused
             </button>
             <button
               onClick={() => handleAction("generate", onGenerate)}
@@ -165,6 +188,14 @@ export function TranslationEditor({
           >
             {actionLoading.value === "extract" && <Spinner />}
             Extract
+          </button>
+          <button
+            onClick={() => handleAction("checkUnused", onCheckUnused)}
+            disabled={actionLoading.value !== null}
+            class="btn-secondary flex items-center gap-2"
+          >
+            {actionLoading.value === "checkUnused" && <Spinner />}
+            Check Unused
           </button>
           <button
             onClick={() => handleAction("generate", onGenerate)}
