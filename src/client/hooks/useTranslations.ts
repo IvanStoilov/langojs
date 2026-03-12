@@ -29,6 +29,20 @@ const statusFilter = signal<
   "all" | "missing" | "partial" | "pending" | "complete" | "unused"
 >("all");
 
+// Helper function to match with wildcard (*) support
+const matchesPattern = (text: string, pattern: string): boolean => {
+  if (!pattern.includes("*")) {
+    return text.toLowerCase().includes(pattern);
+  }
+  // Convert wildcard pattern to regex
+  // Escape special regex characters except *, then replace * with .*
+  const regexPattern = pattern
+    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, ".*");
+  const regex = new RegExp(regexPattern, "i");
+  return regex.test(text);
+};
+
 export const translationStatuses = computed<TranslationStatus[]>(() => {
   const { translations, groups, masterLanguage, availableLanguages } =
     state.value;
@@ -59,13 +73,13 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
   const { pendingApproval, unusedKeys } = state.value;
   const filter = statusFilter.value;
 
-  // Apply text search filter
+  // Apply text search filter (supports * wildcard)
   let filtered = query
     ? statuses.filter(
         (s) =>
-          s.key.toLowerCase().includes(query) ||
+          matchesPattern(s.key, query) ||
           Object.values(s.translations).some(
-            (v) => v && v.toLowerCase().includes(query),
+            (v) => v && matchesPattern(v, query),
           ),
       )
     : statuses;
