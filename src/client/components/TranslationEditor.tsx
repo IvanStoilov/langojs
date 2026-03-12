@@ -226,9 +226,11 @@ export function TranslationEditor({
                 </button>
               )}
               <button
-                onClick={() =>
-                  handleAction("clear", () => onClearTranslations(item.key))
-                }
+                onClick={() => {
+                  if (confirm("Are you sure you want to clear all translations for this key? This cannot be undone.")) {
+                    handleAction("clear", () => onClearTranslations(item.key));
+                  }
+                }}
                 disabled={actionLoading.value !== null}
                 class="btn-ghost text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center gap-1.5"
               >
