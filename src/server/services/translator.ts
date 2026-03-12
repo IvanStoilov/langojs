@@ -42,7 +42,7 @@ export async function translateMissingStrings(
 
     for (const lang of config.availableLanguages) {
       if (lang === config.masterLanguage) continue;
-      if (translations[lang] !== null) continue;
+      if (!!translations[lang]) continue;
 
       if (!pendingByLanguage.has(lang)) {
         pendingByLanguage.set(lang, []);
