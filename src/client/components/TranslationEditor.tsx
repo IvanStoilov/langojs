@@ -43,101 +43,112 @@ export function TranslationEditor({
     }
   };
 
-  if (!item) {
-    return (
-      <div class="flex-1 flex flex-col">
-        {/* Header with actions */}
-        <header class="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-surface">
-          <div></div>
-          <div class="flex items-center gap-2">
-            <button
-              onClick={() => handleAction("extract", onExtract)}
-              disabled={actionLoading.value !== null}
-              class="btn-secondary flex items-center gap-2"
-            >
-              {actionLoading.value === "extract" && <Spinner />}
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                />
-              </svg>
-              Extract
-            </button>
-            <button
-              onClick={() => handleAction("checkUnused", onCheckUnused)}
-              disabled={actionLoading.value !== null}
-              class="btn-secondary flex items-center gap-2"
-            >
-              {actionLoading.value === "checkUnused" && <Spinner />}
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                />
-              </svg>
-              Check Unused
-            </button>
-            <button
-              onClick={() => handleAction("generate", onGenerate)}
-              disabled={actionLoading.value !== null}
-              class="btn-secondary flex items-center gap-2"
-            >
-              {actionLoading.value === "generate" && <Spinner />}
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              Generate
-            </button>
-            <button
-              onClick={() => handleAction("translateAll", onTranslateAll)}
-              disabled={actionLoading.value !== null}
-              class="btn-primary flex items-center gap-2"
-            >
-              {actionLoading.value === "translateAll" && <Spinner />}
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-              AI Translate All
-            </button>
+  return (
+    <div class="flex-1 flex flex-col">
+      {/* Header with actions */}
+      <header class="h-14 border-b border-gray-200 flex items-center justify-between px-6 bg-surface gap-4">
+        {item ? (
+          <div class="flex items-center gap-3">
+            <StatusBadge status={item.status} />
+            <span class="font-mono text-sm text-[var(--color-text)]">
+              {item.key}
+            </span>
+            <span class="text-xs text-[var(--color-text-dim)] uppercase tracking-wide">
+              {item.group}
+            </span>
           </div>
-        </header>
+        ) : (
+          <div></div>
+        )}
+        <div class="flex items-center gap-2">
+          <button
+            onClick={() => handleAction("extract", onExtract)}
+            disabled={actionLoading.value !== null}
+            class="btn-secondary flex items-center gap-2 text-nowrap"
+          >
+            {actionLoading.value === "extract" && <Spinner />}
+            <svg
+              className="w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              />
+            </svg>
+            Extract
+          </button>
+          <button
+            onClick={() => handleAction("checkUnused", onCheckUnused)}
+            disabled={actionLoading.value !== null}
+            class="btn-secondary flex items-center gap-2  text-nowrap"
+          >
+            {actionLoading.value === "checkUnused" && <Spinner />}
+            <svg
+              class="w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+              />
+            </svg>
+            Check Unused
+          </button>
+          <button
+            onClick={() => handleAction("generate", onGenerate)}
+            disabled={actionLoading.value !== null}
+            class="btn-secondary flex items-center gap-2 text-nowrap"
+          >
+            {actionLoading.value === "generate" && <Spinner />}
+            <svg
+              class="w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Generate
+          </button>
+          <button
+            onClick={() => handleAction("translateAll", onTranslateAll)}
+            disabled={actionLoading.value !== null}
+            class="btn-primary flex items-center gap-2 text-nowrap"
+          >
+            {actionLoading.value === "translateAll" && <Spinner />}
+            <svg
+              class="w-4 h-4 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+            AI Translate All
+          </button>
+        </div>
+      </header>
 
-        {/* Empty state */}
+      {!item ? (
         <div class="flex-1 flex items-center justify-center">
           <div class="text-center">
             <div class="w-16 h-16 rounded-full bg-[var(--color-surface-raised)] flex items-center justify-center mx-auto mb-4">
@@ -163,91 +174,65 @@ export function TranslationEditor({
             </p>
           </div>
         </div>
-      </div>
-    );
-  }
+      ) : (
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="max-w-2xl space-y-6 animate-fade-in">
+            {languages.map((lang) => {
+              const isPending = pendingApproval.includes(`${lang}:${item.key}`);
+              return (
+                <LanguageField
+                  key={lang}
+                  language={lang}
+                  value={item.translations[lang]}
+                  isMaster={lang === masterLanguage}
+                  isPending={isPending}
+                  translationKey={item.key}
+                  onUpdate={onUpdate}
+                  onApprove={onApprove}
+                  onTranslate={onTranslateSingle}
+                />
+              );
+            })}
 
-  return (
-    <div class="flex-1 flex flex-col">
-      {/* Header */}
-      <header class="h-14 border-b border-[var(--color-border)] flex items-center justify-between px-6 bg-[var(--color-surface)]">
-        <div class="flex items-center gap-3">
-          <StatusBadge status={item.status} />
-          <span class="font-mono text-sm text-[var(--color-text)]">
-            {item.key}
-          </span>
-          <span class="text-xs text-[var(--color-text-dim)] uppercase tracking-wide">
-            {item.group}
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button
-            onClick={() => handleAction("extract", onExtract)}
-            disabled={actionLoading.value !== null}
-            class="btn-secondary flex items-center gap-2"
-          >
-            {actionLoading.value === "extract" && <Spinner />}
-            Extract
-          </button>
-          <button
-            onClick={() => handleAction("checkUnused", onCheckUnused)}
-            disabled={actionLoading.value !== null}
-            class="btn-secondary flex items-center gap-2"
-          >
-            {actionLoading.value === "checkUnused" && <Spinner />}
-            Check Unused
-          </button>
-          <button
-            onClick={() => handleAction("generate", onGenerate)}
-            disabled={actionLoading.value !== null}
-            class="btn-secondary flex items-center gap-2"
-          >
-            {actionLoading.value === "generate" && <Spinner />}
-            Generate
-          </button>
-          <button
-            onClick={() => handleAction("translateAll", onTranslateAll)}
-            disabled={actionLoading.value !== null}
-            class="btn-primary flex items-center gap-2"
-          >
-            {actionLoading.value === "translateAll" && <Spinner />}
-            AI Translate All
-          </button>
-        </div>
-      </header>
-
-      {/* Editor content */}
-      <div class="flex-1 overflow-y-auto p-6">
-        <div class="max-w-2xl space-y-6 animate-fade-in">
-          {languages.map((lang) => {
-            const isPending = pendingApproval.includes(`${lang}:${item.key}`);
-            return (
-              <LanguageField
-                key={lang}
-                language={lang}
-                value={item.translations[lang]}
-                isMaster={lang === masterLanguage}
-                isPending={isPending}
-                translationKey={item.key}
-                onUpdate={onUpdate}
-                onApprove={onApprove}
-                onTranslate={onTranslateSingle}
-              />
-            );
-          })}
-
-          {/* Action buttons */}
-          <div class="pt-4 border-t border-[var(--color-border)] flex items-center gap-3">
-            {/* Approve All button - only show if there are pending approvals for this key */}
-            {pendingApproval.some((p) => p.endsWith(`:${item.key}`)) && (
+            {/* Action buttons */}
+            <div class="pt-4 border-t border-[var(--color-border)] flex items-center gap-3">
+              {/* Approve All button - only show if there are pending approvals for this key */}
+              {pendingApproval.some((p) => p.endsWith(`:${item.key}`)) && (
+                <button
+                  onClick={() =>
+                    handleAction("approveAll", () => onApproveAll(item.key))
+                  }
+                  disabled={actionLoading.value !== null}
+                  class="btn-ghost text-[var(--color-success)] hover:bg-[var(--color-success)]/10 flex items-center gap-1.5"
+                >
+                  {actionLoading.value === "approveAll" ? (
+                    <Spinner />
+                  ) : (
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  )}
+                  Approve all
+                </button>
+              )}
               <button
                 onClick={() =>
-                  handleAction("approveAll", () => onApproveAll(item.key))
+                  handleAction("clear", () => onClearTranslations(item.key))
                 }
                 disabled={actionLoading.value !== null}
-                class="btn-ghost text-[var(--color-success)] hover:bg-[var(--color-success)]/10 flex items-center gap-1.5"
+                class="btn-ghost text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center gap-1.5"
               >
-                {actionLoading.value === "approveAll" ? (
+                {actionLoading.value === "clear" ? (
                   <Spinner />
                 ) : (
                   <svg
@@ -260,42 +245,16 @@ export function TranslationEditor({
                       stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     />
                   </svg>
                 )}
-                Approve all
+                Clear all translations
               </button>
-            )}
-            <button
-              onClick={() =>
-                handleAction("clear", () => onClearTranslations(item.key))
-              }
-              disabled={actionLoading.value !== null}
-              class="btn-ghost text-[var(--color-error)] hover:bg-[var(--color-error)]/10 flex items-center gap-1.5"
-            >
-              {actionLoading.value === "clear" ? (
-                <Spinner />
-              ) : (
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              )}
-              Clear all translations
-            </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
