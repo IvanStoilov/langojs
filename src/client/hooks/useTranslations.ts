@@ -37,7 +37,7 @@ export const translationStatuses = computed<TranslationStatus[]>(() => {
   const statuses: TranslationStatus[] = Object.entries(translations).map(
     ([key, entry]) => {
       const missingCount = availableLanguages.filter(
-        (lang) => entry[lang] === null || entry[lang] === undefined,
+        (lang) => !entry[lang],
       ).length;
 
       let status: "complete" | "partial" | "missing";
